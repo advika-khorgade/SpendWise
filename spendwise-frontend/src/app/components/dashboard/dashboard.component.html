@@ -1,0 +1,97 @@
+<div class="dashboard-container">
+  <div class="header-section">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Your expense overview and spending summary</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading your data...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-content">
+    <!-- Total Expenses Card -->
+    <mat-card class="total-card">
+      <div class="total-content">
+        <div class="total-info">
+          <h2 class="total-label">Total Expenses</h2>
+          <p class="total-amount">{{ total | currency }}</p>
+        </div>
+        <div class="total-icon">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Category Summary Section -->
+    <div class="summary-section">
+      <h2 class="section-title">Spending by Category</h2>
+
+      <div *ngIf="getSummaryArray().length === 0" class="empty-state">
+        <mat-icon>folder_open</mat-icon>
+        <p>No expenses recorded yet. Start adding expenses to see your spending breakdown.</p>
+      </div>
+
+      <div *ngIf="getSummaryArray().length > 0" class="category-grid">
+        <mat-card
+          *ngFor="let item of getSummaryArray()"
+          class="category-card"
+          [style.border-left-color]="getCategoryColor(item.category)"
+        >
+          <div class="category-header">
+            <div class="category-info">
+              <mat-icon [style.color]="getCategoryColor(item.category)">
+                {{ getCategoryIcon(item.category) }}
+              </mat-icon>
+              <h3 class="category-name">{{ item.category | titlecase }}</h3>
+            </div>
+            <p class="category-amount">{{ item.amount | currency }}</p>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <mat-progress-bar
+              mode="determinate"
+              [value]="getPercentage(item.amount)"
+              class="category-progress"
+              [style.background-color]="getCategoryColor(item.category) + '20'"
+            ></mat-progress-bar>
+            <span class="percentage">{{ getPercentage(item.amount) | number: '1.0-0' }}%</span>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div *ngIf="getSummaryArray().length > 0" class="stats-section">
+      <mat-card class="stat-card">
+        <div class="stat-content">
+          <mat-icon>trending_up</mat-icon>
+          <h3>Categories</h3>
+          <p class="stat-value">{{ getSummaryArray().length }}</p>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <div class="stat-content">
+          <mat-icon>average</mat-icon>
+          <h3>Average per Category</h3>
+          <p class="stat-value">
+            {{ getAveragePerCategory() | currency }}
+          </p>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <div class="stat-content">
+          <mat-icon>flag</mat-icon>
+          <h3>Highest Category</h3>
+          <p class="stat-value">
+            {{ getHighestCategory() | titlecase }}
+          </p>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>
+

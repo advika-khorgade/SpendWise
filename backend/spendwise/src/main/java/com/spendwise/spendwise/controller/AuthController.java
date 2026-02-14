@@ -5,6 +5,8 @@ import com.spendwise.spendwise.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import com.spendwise.spendwise.dto.LoginRequest;
+import com.spendwise.spendwise.dto.RegistrationRequest;
+import com.spendwise.spendwise.dto.AuthResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 @RestController
@@ -24,15 +26,17 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
+    public AuthResponse register(@RequestBody RegistrationRequest request) {
 
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return "User already exists";
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return new AuthResponse("User already exists", false);
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Create user with email as name if name not provided
+        User user = new User(request.getEmail().split("@")[0], request.getEmail(), request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        return "User registered successfully";
+        return new AuthResponse("User registered successfully", true);
     }
 
    /* @PostMapping("/login")
@@ -45,20 +49,20 @@ public class AuthController {
     }*/
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    public AuthResponse login(@RequestBody LoginRequest request) {
 
         Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 
         if (userOptional.isEmpty()) {
-            return "User not found";
+            return new AuthResponse("User not found", false);
         }
 
         User user = userOptional.get();
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return "Invalid password";
+            return new AuthResponse("Invalid password", false);
         }
-        return "Login successful";
+        return new AuthResponse("Login successful", true);
     }
 
 }

@@ -1,0 +1,104 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <div class="header-content">
+        <h1>💰 SpendWise</h1>
+        <p>Create your account</p>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form (ngSubmit)="register()" class="register-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            [(ngModel)]="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            required
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [(ngModel)]="password"
+            name="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Enter your password (min. 6 characters)"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            type="button"
+            class="password-toggle"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            matInput
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Confirm your password"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="toggleConfirmPasswordVisibility()"
+            type="button"
+            class="password-toggle"
+          >
+            <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div *ngIf="error" class="error-message">
+          {{ error }}
+        </div>
+
+        <div *ngIf="success" class="success-message">
+          {{ success }}
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width register-button"
+          [disabled]="loading"
+        >
+          <span *ngIf="!loading">Create Account</span>
+          <mat-spinner *ngIf="loading" diameter="20" class="spinner"></mat-spinner>
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>Already have an account?</span>
+      </div>
+
+      <button
+        mat-button
+        color="accent"
+        class="full-width"
+        (click)="navigateToLogin()"
+        type="button"
+      >
+        Login
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="background-decoration"></div>
+</div>
+
