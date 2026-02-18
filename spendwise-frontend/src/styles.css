@@ -68,3 +68,39 @@ body {
   background: #555;
 }
 
+/* Dark Mode */
+.dark-theme {
+  --primary-color: #bb86fc;
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --text-color: #ffffff;
+  --text-secondary: #b0b0b0;
+}
+
+.dark-theme body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.dark-theme .mat-mdc-card {
+  background-color: var(--surface-color);
+  color: var(--text-color);
+}
+
+.dark-theme .mat-mdc-button {
+  color: var(--text-color);
+}
+
+.dark-theme .mat-mdc-input-element {
+  color: var(--text-color);
+  background-color: var(--surface-color);
+}
+
+.dark-theme .mat-mdc-form-field-label {
+  color: var(--text-secondary);
+}
+
+.dark-theme .mat-mdc-toolbar {
+  background-color: var(--surface-color);
+  color: var(--text-color);
+}

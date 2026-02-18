@@ -1,9 +1,11 @@
 <mat-toolbar color="primary" *ngIf="isLoggedIn()">
   <span class="app-title">💰 SpendWise</span>
   <span class="spacer"></span>
-  <button mat-button (click)="navigateTo('dashboard')">Dashboard</button>
   <button mat-button (click)="navigateTo('expenses')">Expenses</button>
   <span class="user-email">{{ getCurrentUser() }}</span>
+  <button mat-button (click)="toggleDarkMode()">
+    <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
   <button mat-button (click)="logout()">Logout</button>
 </mat-toolbar>
 

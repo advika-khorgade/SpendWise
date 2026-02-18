@@ -12,14 +12,24 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './app.css'
 })
 export class App {
-  constructor(private router: Router) {}
+  isDarkMode = false;
+
+  constructor(private router: Router) {
+    if (typeof window !== 'undefined') {
+      this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+      this.applyTheme();
+    }
+  }
 
   isLoggedIn(): boolean {
+    if (typeof window === 'undefined') return false;
     return !!localStorage.getItem('email');
   }
 
   logout(): void {
-    localStorage.removeItem('email');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('email');
+    }
     this.router.navigate(['/login']);
   }
 
@@ -28,6 +38,25 @@ export class App {
   }
 
   getCurrentUser(): string {
+    if (typeof window === 'undefined') return '';
     return localStorage.getItem('email') || '';
+  }
+
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('darkMode', this.isDarkMode.toString());
+    }
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    if (typeof document !== 'undefined') {
+      if (this.isDarkMode) {
+        document.body.classList.add('dark-theme');
+      } else {
+        document.body.classList.remove('dark-theme');
+      }
+    }
   }
 }

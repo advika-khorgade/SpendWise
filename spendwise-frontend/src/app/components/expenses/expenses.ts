@@ -10,6 +10,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { NgChartsModule } from 'ng2-charts';
+import { ChartConfiguration } from 'chart.js';
 import { ExpenseService } from '../../services/expense.service';
 
 @Component({
@@ -26,6 +29,8 @@ import { ExpenseService } from '../../services/expense.service';
     MatNativeDateModule,
     MatIconModule,
     MatProgressBarModule,
+    MatTabsModule,
+    NgChartsModule,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.css',
@@ -39,19 +44,42 @@ export class ExpensesComponent implements OnInit {
   date: any;
   startDate: any;
   endDate: any;
-  email = localStorage.getItem('email') || '';
+  email: string = '';
   loading = false;
   filterActive = false;
   successMessage = '';
   errorMessage = '';
 
-  constructor(
+  // Chart
+  public pieChartOptions: ChartConfiguration<'pie'>['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Expenses by Category',
+      },
+    },
+  };
+  public pieChartData: ChartConfiguration<'pie'>['data'] = {
+    labels: [],
+    datasets: [{
+      data: [],
+    }],
+  };
+  public pieChartType = 'pie' as const;
     private expenseService: ExpenseService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    if (typeof window !== 'undefined') {
+      this.email = localStorage.getItem('email') || '';
+    }
     this.loadExpenses();
+    this.loadSummary();
   }
 
   loadExpenses() {
@@ -66,6 +94,25 @@ export class ExpensesComponent implements OnInit {
         this.loading = false;
         this.errorMessage = 'Failed to load expenses';
         this.cdr.markForCheck();
+      },
+    });
+  }
+
+  loadSummary() {
+    this.expenseService.getSummary(this.email).subscribe({
+      next: (summary) => {
+        const labels = Object.keys(summary);
+        const data = Object.values(summary).map(v => Number(v));
+        this.pieChartData = {
+          labels,
+          datasets: [{
+            data,
+          }],
+        };
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // Handle error if needed
       },
     });
   }

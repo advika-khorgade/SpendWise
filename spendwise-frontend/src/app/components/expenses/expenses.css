@@ -246,3 +246,13 @@ mat-card-header h2 {
     font-size: 0.85rem;
   }
 }
+
+/* Chart */
+.chart-card {
+  margin-top: 2rem;
+}
+
+.chart-card canvas {
+  max-width: 100%;
+  height: auto;
+}
