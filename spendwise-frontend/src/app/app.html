@@ -2,6 +2,7 @@
   <span class="app-title">💰 SpendWise</span>
   <span class="spacer"></span>
   <button mat-button (click)="navigateTo('expenses')">Expenses</button>
+  <button mat-button (click)="navigateTo('budget')">Budget</button>
   <span class="user-email">{{ getCurrentUser() }}</span>
   <button mat-button (click)="toggleDarkMode()">
     <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>

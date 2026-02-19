@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -109,5 +111,82 @@ public class ExpenseController {
         }
 
         return expenseRepository.findByUser(userOptional.get());
+    }
+
+    // Get monthly report
+    @GetMapping("/monthly-report")
+    public MonthlyReport getMonthlyReport(@RequestParam String email, @RequestParam int year, @RequestParam int month) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return new MonthlyReport();
+        }
+
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<Expense> expenses = expenseRepository.findByUser(userOptional.get()).stream()
+                .filter(e -> !e.getDate().isBefore(start) && !e.getDate().isAfter(end))
+                .toList();
+
+        double total = expenses.stream().mapToDouble(e -> e.getAmount()).sum();
+        Map<String, Double> categoryTotals = expenses.stream()
+                .collect(Collectors.groupingBy(Expense::getCategory, Collectors.summingDouble(Expense::getAmount)));
+
+        return new MonthlyReport(total, categoryTotals, expenses.size());
+    }
+
+    // Get yearly report
+    @GetMapping("/yearly-report")
+    public YearlyReport getYearlyReport(@RequestParam String email, @RequestParam int year) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return new YearlyReport();
+        }
+
+        LocalDate start = LocalDate.of(year, 1, 1);
+        LocalDate end = LocalDate.of(year, 12, 31);
+
+        List<Expense> expenses = expenseRepository.findByUser(userOptional.get()).stream()
+                .filter(e -> !e.getDate().isBefore(start) && !e.getDate().isAfter(end))
+                .toList();
+
+        double total = expenses.stream().mapToDouble(e -> e.getAmount()).sum();
+        Map<Integer, Double> monthlyTotals = new HashMap<>();
+        for (int m = 1; m <= 12; m++) {
+            LocalDate monthStart = LocalDate.of(year, m, 1);
+            LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+            double monthTotal = expenses.stream()
+                    .filter(e -> !e.getDate().isBefore(monthStart) && !e.getDate().isAfter(monthEnd))
+                    .mapToDouble(e -> e.getAmount()).sum();
+            monthlyTotals.put(m, monthTotal);
+        }
+
+        return new YearlyReport(total, monthlyTotals, expenses.size());
+    }
+
+    public static class MonthlyReport {
+        public double total;
+        public Map<String, Double> categoryTotals;
+        public int expenseCount;
+
+        public MonthlyReport() {}
+        public MonthlyReport(double total, Map<String, Double> categoryTotals, int expenseCount) {
+            this.total = total;
+            this.categoryTotals = categoryTotals;
+            this.expenseCount = expenseCount;
+        }
+    }
+
+    public static class YearlyReport {
+        public double total;
+        public Map<Integer, Double> monthlyTotals;
+        public int expenseCount;
+
+        public YearlyReport() {}
+        public YearlyReport(double total, Map<Integer, Double> monthlyTotals, int expenseCount) {
+            this.total = total;
+            this.monthlyTotals = monthlyTotals;
+            this.expenseCount = expenseCount;
+        }
     }
 }

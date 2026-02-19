@@ -1,0 +1,92 @@
+<div class="budget-container">
+  <div class="header-section">
+    <h1 class="page-title">Budget Management</h1>
+    <p class="page-subtitle">Set and track your spending budgets</p>
+  </div>
+
+  <!-- Loading Bar -->
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <!-- Add Budget Form -->
+  <mat-card class="form-card">
+    <mat-card-header>
+      <h2>Add New Budget</h2>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="addBudget()" class="budget-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select [(ngModel)]="category" name="category">
+            <mat-option value="food">Food</mat-option>
+            <mat-option value="transport">Transport</mat-option>
+            <mat-option value="entertainment">Entertainment</mat-option>
+            <mat-option value="shopping">Shopping</mat-option>
+            <mat-option value="utilities">Utilities</mat-option>
+            <mat-option value="health">Health</mat-option>
+            <mat-option value="education">Education</mat-option>
+            <mat-option value="other">Other</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Amount</mat-label>
+          <input matInput type="number" [(ngModel)]="amount" name="amount" placeholder="0.00" step="0.01" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Period</mat-label>
+          <mat-select [(ngModel)]="period" name="period">
+            <mat-option value="monthly">Monthly</mat-option>
+            <mat-option value="yearly">Yearly</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" name="startDate" />
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" name="endDate" />
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          Add Budget
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Budgets List -->
+  <mat-card class="budgets-card">
+    <mat-card-header>
+      <h2>Your Budgets</h2>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="budgets.length === 0" class="empty-state">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <p>No budgets set. Add your first budget above!</p>
+      </div>
+
+      <div *ngIf="budgets.length > 0" class="budgets-grid">
+        <mat-card *ngFor="let budget of budgets" class="budget-item" [style.border-left-color]="getCategoryColor(budget.category)">
+          <mat-card-content>
+            <div class="budget-header">
+              <h3>{{ budget.category | titlecase }} Budget</h3>
+              <button mat-icon-button color="warn" (click)="deleteBudget(budget.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <p class="budget-amount">${{ budget.amount }}</p>
+            <p class="budget-period">{{ budget.period | titlecase }} ({{ budget.startDate | date }} - {{ budget.endDate | date }})</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

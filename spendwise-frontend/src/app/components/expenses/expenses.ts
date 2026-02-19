@@ -11,8 +11,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTabsModule } from '@angular/material/tabs';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
+import { HttpClient } from '@angular/common/http';
 import { ExpenseService } from '../../services/expense.service';
 
 @Component({
@@ -30,7 +31,7 @@ import { ExpenseService } from '../../services/expense.service';
     MatIconModule,
     MatProgressBarModule,
     MatTabsModule,
-    NgChartsModule,
+    BaseChartDirective,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.css',
@@ -70,7 +71,34 @@ export class ExpensesComponent implements OnInit {
     }],
   };
   public pieChartType = 'pie' as const;
+
+  // Line chart for trends
+  public lineChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Monthly Spending Trends',
+      },
+    },
+  };
+  public lineChartData: ChartConfiguration<'line'>['data'] = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Spending',
+      fill: false,
+      tension: 0.1,
+    }],
+  };
+  public lineChartType = 'line' as const;
+
+  constructor(
     private expenseService: ExpenseService,
+    private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -85,7 +113,7 @@ export class ExpensesComponent implements OnInit {
   loadExpenses() {
     this.loading = true;
     this.expenseService.getExpenses(this.email).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.expenses = res;
         this.loading = false;
         this.cdr.markForCheck();
@@ -100,7 +128,7 @@ export class ExpensesComponent implements OnInit {
 
   loadSummary() {
     this.expenseService.getSummary(this.email).subscribe({
-      next: (summary) => {
+      next: (summary: any) => {
         const labels = Object.keys(summary);
         const data = Object.values(summary).map(v => Number(v));
         this.pieChartData = {
@@ -113,6 +141,28 @@ export class ExpensesComponent implements OnInit {
       },
       error: () => {
         // Handle error if needed
+      },
+    });
+
+    // Load yearly report for trends
+    const currentYear = new Date().getFullYear();
+    this.http.get<any>(`/api/expenses/yearly-report?email=${this.email}&year=${currentYear}`).subscribe({
+      next: (report: any) => {
+        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const data = Object.values(report.monthlyTotals).map(v => Number(v));
+        this.lineChartData = {
+          labels,
+          datasets: [{
+            data,
+            label: 'Monthly Spending',
+            fill: false,
+            tension: 0.1,
+          }],
+        };
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // Handle error
       },
     });
   }
@@ -188,7 +238,7 @@ export class ExpensesComponent implements OnInit {
         this.formatDate(this.endDate)
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.expenses = res;
           this.filterActive = true;
           this.loading = false;

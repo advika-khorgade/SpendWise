@@ -56,8 +56,8 @@ export class Login {
         if (response.success) {
           console.log('✅ Login successful, storing email and navigating');
           localStorage.setItem('email', this.email);
-          this.router.navigate(['/dashboard']).then(success => {
-            console.log('Navigation to dashboard:', success);
+          this.router.navigate(['/expenses']).then(success => {
+            console.log('Navigation to expenses:', success);
           });
         } else {
           console.log('❌ Login failed with response:', response.message);
